@@ -1,0 +1,62 @@
+name: Perbarui data dan terbitkan dashboard
+
+on:
+  schedule:
+    - cron: "30 0 * * 1-5"   # 07:30 WIB
+    - cron: "30 9 * * 1-5"   # 16:30 WIB
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["index.html", "data/flows.json", "data/events.json", "scripts/**"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Pasang dependensi
+        run: pip install -r requirements.txt
+
+      - name: Ambil data
+        run: python scripts/fetch_data.py
+
+      - name: Simpan data ke repositori (riwayat)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json data/history.json
+          git diff --cached --quiet || git commit -m "Perbarui data $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git pull --rebase origin main || true
+          git push || true
+
+      - name: Siapkan situs
+        run: |
+          mkdir _site
+          cp index.html _site/
+          cp -r data _site/data
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Terbitkan
+        id: deploy
+        uses: actions/deploy-pages@v4
