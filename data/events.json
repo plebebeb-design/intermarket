@@ -1,0 +1,16 @@
+{
+  "diperbarui": "2026-10-19",
+  "sumber": "BabyPips Fundies Cheat Sheet 19 Okt 2026, Reuters, CNBC Indonesia. Waktu dalam WIB. Diisi manual tiap Senin.",
+  "acara": [
+    {"tanggal": "2026-10-20", "waktu": "13:00", "judul": "Pengangguran Inggris", "penting": "rendah", "catatan": "Perkiraan 4,9%, tetap"},
+    {"tanggal": "2026-10-21", "waktu": "13:00", "judul": "CPI Inggris", "penting": "sedang", "catatan": "Perkiraan 3,4% vs 3,1% sebelumnya"},
+    {"tanggal": "2026-10-21", "waktu": "21:30", "judul": "Persediaan minyak AS", "penting": "sedang", "catatan": "Pekan lalu turun 8,6 juta barel"},
+    {"tanggal": "2026-10-22", "waktu": "03:00", "judul": "Laba Meta, Tesla, Lam Research, IBM, Texas Instruments", "penting": "tinggi", "catatan": "Ujian untuk tema belanja AI dan semikonduktor"},
+    {"tanggal": "2026-10-22", "waktu": "19:30", "judul": "Klaim pengangguran AS", "penting": "sedang", "catatan": "Perkiraan 200 ribu"},
+    {"tanggal": "2026-10-23", "waktu": "06:30", "judul": "CPI Jepang", "penting": "sedang", "catatan": "Perkiraan 2,1% vs 1,9%"},
+    {"tanggal": "2026-10-23", "waktu": "20:45", "judul": "PMI awal AS dan sentimen UMich", "penting": "sedang", "catatan": "Manufaktur 55,5, jasa 57,9"},
+    {"tanggal": "2026-10-28", "waktu": "waktu AS", "judul": "Keputusan FOMC (rapat 27-28 Okt)", "penting": "tinggi", "catatan": "Peluang kenaikan sekitar 15% per 19 Okt"},
+    {"tanggal": "2026-10-29", "waktu": "", "judul": "BoJ (29-30 Okt)", "penting": "sedang", "catatan": ""},
+    {"tanggal": "2027-04-30", "waktu": "", "judul": "Batas komentar konsultasi MSCI untuk Indonesia", "penting": "sedang", "catatan": "Keputusan akhir paling lambat 30 Jun 2027"}
+  ]
+}

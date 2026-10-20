@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intermarket Pra-Sesi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#6f6d68;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10); --wash:rgba(11,11,11,.05);
+  --up:#2a78d6; --down:#e34948; --up-ink:#1c5cab; --down-ink:#b02a2a;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --ok:#0ca30c; --warn:#fab219; --crit:#d03b3b; --ok-ink:#006300; --warn-ink:#8a5a00; --crit-ink:#a82222;
+  --sans:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0d0d0d; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#a09f98;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --wash:rgba(255,255,255,.06);
+    --up:#3987e5; --down:#e66767; --up-ink:#86b6ef; --down-ink:#f09a9a;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --ok-ink:#0ca30c; --warn-ink:#fab219; --crit-ink:#ec7b7b;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0d0d0d; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#a09f98;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --wash:rgba(255,255,255,.06);
+  --up:#3987e5; --down:#e66767; --up-ink:#86b6ef; --down-ink:#f09a9a;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --ok-ink:#0ca30c; --warn-ink:#fab219; --crit-ink:#ec7b7b;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;
+  padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+:focus-visible{outline:2px solid var(--up);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px}
+h1{font-size:clamp(1.5rem,4vw,2rem);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.lead{color:var(--ink2);font-size:.875rem;margin-top:4px}
+.stamp{font-family:var(--mono);font-size:.75rem;color:var(--ink2);text-align:right}
+.banner{border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.8125rem;background:var(--surface)}
+.banner b{font-weight:600}
+.banner.warn{border-color:var(--warn)}.banner.crit{border-color:var(--crit)}
+.sec{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:500;margin-top:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:.9375rem;font-weight:600}
+.sub{font-size:.8125rem;color:var(--ink2);max-width:72ch}
+.note{font-size:.75rem;color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+/* ringkasan */
+.verdict{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.vbig{font-size:clamp(1.25rem,3vw,1.625rem);font-weight:700;letter-spacing:-.015em}
+.sigs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.sig{border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.sig .t{font-size:.8125rem;color:var(--ink);line-height:1.35}
+.pill{display:inline-flex;align-items:baseline;gap:6px;font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);max-width:100%;line-height:1.3}
+.pill i{font-style:normal;font-size:.75rem}
+.pill.dukung{color:var(--ok-ink)}.pill.netral{color:var(--ink2)}.pill.waspada{color:var(--warn-ink)}.pill.tekanan{color:var(--crit-ink)}
+.sig.waspada{border-left:3px solid var(--warn)}.sig.tekanan{border-left:3px solid var(--crit)}.sig.dukung{border-left:3px solid var(--ok)}
+.rule{font-size:.6875rem;color:var(--muted);line-height:1.35}
+details.rl summary{cursor:pointer;font-size:.75rem;color:var(--ink2)}
+/* tabel */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.8125rem}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--grid);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+td{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--sans);font-weight:500}
+tr.grp td{background:var(--wash);font-family:var(--mono);font-size:.6875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);padding:6px 10px}
+.up{color:var(--up-ink)}.dn{color:var(--down-ink)}
+.ar{font-size:.6rem;margin-right:3px;vertical-align:1px}
+.dt{font-size:.6875rem;color:var(--muted)}.dt.old{color:var(--warn-ink)}
+.spk{display:block;margin-left:auto}
+/* grafik */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.75rem;font-weight:500;color:var(--ink2);background:none;border:1px solid var(--border);border-radius:999px;padding:5px 12px 5px 9px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:32px}
+.chip i{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--axis);display:inline-block}
+.chip[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.chip[aria-pressed="true"] i{border-color:transparent}
+.seg{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.seg button{font:inherit;font-size:.75rem;font-weight:500;color:var(--ink2);background:none;border:0;border-radius:7px;padding:6px 12px;cursor:pointer;min-height:32px}
+.seg button:hover{background:var(--wash)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 16px}
+.chart{width:100%;min-width:0;position:relative}
+.chart svg{display:block;max-width:100%}
+.ax{fill:var(--muted);font:10.5px var(--mono)}
+.gl{stroke:var(--grid);stroke-width:1}.zl{stroke:var(--axis);stroke-width:1}
+.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ev{fill:var(--ink);font:500 10.5px var(--mono)}
+/* heatmap */
+.hm{border-collapse:separate;border-spacing:2px;width:auto;min-width:100%}
+.hm th{text-transform:none;letter-spacing:0;font-size:.6875rem;color:var(--ink2);padding:4px 6px;font-weight:500}
+.hm th.c{text-align:center}
+.hm td{text-align:center;padding:8px 4px;border:0;border-radius:3px;font-size:.6875rem;min-width:46px;color:var(--ink)}
+.hm td.me{background:var(--wash);color:var(--muted)}
+/* arus & kalender */
+.bcell{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.bar{display:inline-block;height:8px;border-radius:2px}
+.bar.p{background:var(--up)}.bar.n{background:var(--down)}
+.cal{display:flex;flex-direction:column}
+.crow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 14px;padding:9px 0;border-bottom:1px solid var(--grid)}
+.crow:last-child{border-bottom:0}
+.cd{font-family:var(--mono);font-size:.75rem;color:var(--ink2)}
+.cd b{display:block;color:var(--ink);font-weight:500}
+.ct{font-size:.8125rem;font-weight:500}
+.cn{font-size:.75rem;color:var(--ink2)}
+.imp{font-family:var(--mono);font-size:.625rem;text-transform:uppercase;letter-spacing:.06em;margin-left:8px;color:var(--muted)}
+.imp.tinggi{color:var(--crit-ink)}.imp.sedang{color:var(--warn-ink)}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.75rem;padding:7px 10px;border-radius:6px;max-width:280px;line-height:1.4;left:0;top:0}
+#tip b{font-weight:600}
+#tip .r{display:flex;align-items:center;gap:6px;white-space:nowrap}
+#tip .r i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.foot{font-size:.75rem;color:var(--ink2);display:flex;flex-direction:column;gap:6px;max-width:90ch}
+.legnote{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.75rem;color:var(--ink2)}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}.stamp{text-align:left}}
+@media (max-width:520px){.card{padding:16px}.crow{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Intermarket Pra-Sesi</h1>
+      <p class="lead">Kondisi lintas aset sebelum sesi IDX dibuka.</p>
+    </div>
+    <div class="stamp" id="stamp">Memuat data…</div>
+  </header>
+  <div id="banners"></div>
+
+  <h2 class="sec">Ringkasan sinyal</h2>
+  <section class="card" id="brief"></section>
+
+  <h2 class="sec">Papan harga</h2>
+  <section class="card">
+    <div class="legnote"><span><span class="up"><span class="ar">▲</span>naik</span> dan <span class="dn"><span class="ar">▼</span>turun</span> hanya menunjukkan arah, bukan baik atau buruk.</span><span>Suku bunga dan spread dalam basis poin (bp).</span></div>
+    <div class="tw"><table id="board"></table></div>
+  </section>
+
+  <h2 class="sec">Pergerakan relatif</h2>
+  <section class="card">
+    <div class="chead">
+      <div><h2>Semua dimulai dari 100</h2><p class="sub">Pilih sampai 4 aset untuk melihat siapa memimpin dan siapa tertinggal pada periode yang sama.</p></div>
+      <div class="seg" id="rng" role="group" aria-label="Periode"></div>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Pilih aset"></div>
+    <div class="chart" id="rebased"></div>
+  </section>
+
+  <h2 class="sec">Hubungan antar aset</h2>
+  <section class="card">
+    <div class="chead">
+      <div><h2>Korelasi perubahan harian</h2><p class="sub">Biru: bergerak searah. Merah: berlawanan. Hubungan yang berubah dari kebiasaannya, misalnya saham dan yield yang tiba-tiba searah, sering menandai pergantian rezim pasar.</p></div>
+      <div class="seg" id="cwin" role="group" aria-label="Jendela korelasi"></div>
+    </div>
+    <div class="tw" id="heat"></div>
+    <p class="note">Dihitung dari hari bursa yang dimiliki semua aset. Pasar Asia dan AS tidak buka bersamaan, jadi korelasi IHSG dengan aset AS cenderung terlihat lebih rendah dari kenyataannya.</p>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <div><h2>Arus dana mingguan</h2><p class="sub" id="fsub"></p></div>
+      <div class="tw"><table id="flows"></table></div>
+    </section>
+    <section class="card">
+      <div><h2>Kalender pekan ini</h2><p class="sub" id="csub"></p></div>
+      <div class="cal" id="cal"></div>
+    </section>
+  </div>
+
+  <section class="foot">
+    <p><b>Cara membaca.</b> Sinyal memakai aturan sederhana yang tertulis di tiap kartu. Itu cara cepat merangkum kondisi, bukan prediksi dan bukan saran investasi.</p>
+    <p><b>Sumber.</b> Yahoo Finance (via yfinance) untuk harga, FRED untuk UST 2 tahun, kurva imbal hasil, dan spread kredit. Data gratis bisa tertunda, berubah format, atau salah. Cocokkan dengan terminal atau broker Anda sebelum bertransaksi.</p>
+  </section>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var NUM=new Intl.NumberFormat('id-ID');
+  function fnum(v,dp){return v==null?'—':v.toLocaleString('id-ID',{minimumFractionDigits:dp,maximumFractionDigits:dp})}
+  function fchg(v,kind){
+    if(v==null) return '<span class="dt">—</span>';
+    var cls=v>0?'up':v<0?'dn':'', ar=v>0?'▲':v<0?'▼':'';
+    var s=Math.abs(v).toLocaleString('id-ID',{minimumFractionDigits:kind==='yield'?0:2,maximumFractionDigits:kind==='yield'?1:2});
+    return '<span class="'+cls+'">'+(ar?'<span class="ar">'+ar+'</span>':'')+(v>0?'+':v<0?'−':'')+s+(kind==='yield'?' bp':'%')+'</span>';
+  }
+  var ICON={dukung:'▲',netral:'◆',waspada:'●',tekanan:'▼'};
+  var LABEL={dukung:'Mendukung',netral:'Netral',waspada:'Waspada',tekanan:'Tekanan'};
+  var MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  function fdate(s){var p=s.split('-');return +p[2]+' '+MON[+p[1]-1]+(p[0]!==String(new Date().getFullYear())?' '+p[0]:'')}
+  function get(n){return fetch('data/'+n+'.json?v='+Date.now()).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
+
+  Promise.all([get('latest'),get('history'),get('flows'),get('events')]).then(function(r){
+    var L=r[0],H=r[1];
+    if(!L||!H){
+      $('stamp').textContent='';
+      $('banners').innerHTML='<div class="banner crit"><b>Data belum tersedia.</b> File data/latest.json dan data/history.json tidak ditemukan. Jalankan workflow di tab Actions, atau jalankan <code>python scripts/fetch_data.py --demo</code> untuk mencoba tampilan.</div>';
+      return;
+    }
+    head(L); brief(L); board(L); rebased(L,H); heat(H); flows(r[2]); cal(r[3]);
+  });
+
+  /* ---------- kepala dan peringatan ---------- */
+  function head(L){
+    $('stamp').innerHTML='Data dibuat<br>'+L.generated_wib;
+    var b='';
+    if(L.demo) b+='<div class="banner warn"><b>Data demo.</b> Angka di halaman ini sintetis, hanya untuk menguji tampilan.</div>';
+    var age=(Date.now()-Date.parse(L.generated_utc))/36e5;
+    if(!L.demo&&age>36) b+='<div class="banner warn"><b>Data sudah '+Math.round(age)+' jam.</b> Jadwal otomatis mungkin tidak berjalan. Cek tab Actions di GitHub.</div>';
+    if(L.errors&&L.errors.length) b+='<div class="banner"><b>'+L.errors.length+' instrumen gagal diambil:</b> '+L.errors.map(function(e){return e.id}).join(', ')+'. Baris itu tidak ditampilkan.</div>';
+    $('banners').innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+b+'</div>';
+  }
+
+  /* ---------- ringkasan ---------- */
+  function brief(L){
+    var s=L.summary, h='<div class="verdict"><span class="pill '+s.state+'"><i>'+ICON[s.state]+'</i>'+LABEL[s.state]+'</span><span class="vbig">'+s.label+'</span><span class="note">'+s.score+' poin dari '+s.n+' sinyal</span></div>';
+    h+='<div class="sigs">'+L.signals.map(function(g){
+      return '<div class="sig '+g.state+'"><span class="pill '+g.state+'"><i>'+ICON[g.state]+'</i>'+g.label+' · '+LABEL[g.state]+'</span><span class="t">'+g.text+'</span><span class="rule">'+g.rule+'</span></div>';
+    }).join('')+'</div>';
+    h+='<details class="rl"><summary>Cara skor total dihitung</summary><p class="note" style="margin-top:6px">'+s.rule+'</p></details>';
+    $('brief').innerHTML=h;
+  }
+
+  /* ---------- papan harga ---------- */
+  function spark(v,kind){
+    var w=84,hh=22,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),rg=(mx-mn)||1;
+    var pts=v.map(function(y,i){return [i/(v.length-1)*(w-4)+2,hh-2-(y-mn)/rg*(hh-4)]});
+    var d=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)}).join('');
+    var up=v[v.length-1]>=v[0], e=pts[pts.length-1];
+    return '<svg class="spk" width="'+w+'" height="'+hh+'" viewBox="0 0 '+w+' '+hh+'" aria-hidden="true"><path d="'+d+'" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linejoin="round"/><circle cx="'+e[0].toFixed(1)+'" cy="'+e[1].toFixed(1)+'" r="2.5" fill="'+(up?'var(--up)':'var(--down)')+'"/></svg>';
+  }
+  function board(L){
+    var maxd=L.assets.reduce(function(m,a){return a.date>m?a.date:m},'');
+    var h='<thead><tr><th>Instrumen</th><th>Terakhir</th><th>1D</th><th>5D</th><th>1M</th><th>YTD</th><th>60 hari</th><th>Per</th></tr></thead><tbody>';
+    var g='';
+    L.assets.forEach(function(a){
+      if(a.group!==g){g=a.group;h+='<tr class="grp"><td colspan="8">'+g+'</td></tr>'}
+      var old=a.date<maxd?' old':'';
+      h+='<tr><td>'+a.name+'</td><td>'+fnum(a.last,a.dp)+'</td><td>'+fchg(a.d1,a.kind)+'</td><td>'+fchg(a.d5,a.kind)+'</td><td>'+fchg(a.d21,a.kind)+'</td><td>'+fchg(a.ytd,a.kind)+'</td><td>'+spark(a.spark,a.kind)+'</td><td><span class="dt'+old+'">'+fdate(a.date)+'</span></td></tr>';
+    });
+    $('board').innerHTML=h+'</tbody>';
+  }
+
+  /* ---------- tooltip ---------- */
+  var tip=$('tip');
+  function showTip(html,x,y){
+    tip.innerHTML=html;tip.hidden=false;
+    var r=tip.getBoundingClientRect(),Lf=x+14,T=y-r.height-12;
+    if(Lf+r.width>innerWidth-8)Lf=x-r.width-14; if(Lf<8)Lf=8; if(T<8)T=y+16;
+    tip.style.left=Lf+'px';tip.style.top=T+'px';
+  }
+  function hideTip(){tip.hidden=true}
+
+  /* ---------- grafik rebased ---------- */
+  var CAND=[['spx','S&P 500'],['ndx','Nasdaq'],['jkse','IHSG'],['dxy','Dolar (DXY)'],['gold','Emas'],['brent','Brent'],['copper','Tembaga'],['btc','Bitcoin'],['usdidr','USD/IDR'],['n225','Nikkei']];
+  var SLOT={}; CAND.forEach(function(c,i){SLOT[c[0]]=['--s1','--s2','--s3','--s4'][i%4]});
+  var state={sel:['spx','gold','dxy','brent'],days:63};
+  var RANGES=[['1B',21],['3B',63],['6B',126],['1T',250]];
+  function rebased(L,H){
+    var names={}; CAND.forEach(function(c){names[c[0]]=c[1]});
+    $('rng').innerHTML=RANGES.map(function(x){return '<button type="button" data-d="'+x[1]+'" aria-pressed="'+(x[1]===state.days)+'">'+x[0]+'</button>'}).join('');
+    $('rng').onclick=function(e){var b=e.target.closest('button');if(!b)return;state.days=+b.dataset.d;
+      [].forEach.call($('rng').children,function(x){x.setAttribute('aria-pressed',x===b)});draw()};
+    function chips(){
+      $('chips').innerHTML=CAND.filter(function(c){return H[c[0]]}).map(function(c){
+        var on=state.sel.indexOf(c[0])>-1;
+        return '<button type="button" class="chip" data-id="'+c[0]+'" aria-pressed="'+on+'"><i style="background:'+(on?'var('+SLOT[c[0]]+')':'transparent')+'"></i>'+c[1]+'</button>';
+      }).join('');
+    }
+    $('chips').onclick=function(e){
+      var b=e.target.closest('.chip');if(!b)return;var id=b.dataset.id,i=state.sel.indexOf(id);
+      if(i>-1){if(state.sel.length>1)state.sel.splice(i,1)}
+      else{state.sel.push(id);if(state.sel.length>4)state.sel.shift()}
+      chips();draw();
+    };
+    function series(id){
+      var d=H[id].d,v=H[id].v,s=Math.max(0,d.length-1-state.days);
+      var base=v[s];return d.slice(s).map(function(x,i){return {d:x,t:Date.parse(x),r:v[s+i]/base*100,raw:v[s+i]}});
+    }
+    function nice(rng,n){var raw=rng/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
+    function draw(){
+      var el=$('rebased'),w=Math.max(280,el.clientWidth),h=300,wide=w>560;
+      var m={l:44,r:wide?78:12,t:14,b:26},iw=w-m.l-m.r,ih=h-m.t-m.b;
+      var S=state.sel.filter(function(i){return H[i]}).map(function(id){return {id:id,pts:series(id)}});
+      var tmin=Infinity,tmax=-Infinity,lo=100,hi=100;
+      S.forEach(function(s){s.pts.forEach(function(p){tmin=Math.min(tmin,p.t);tmax=Math.max(tmax,p.t);lo=Math.min(lo,p.r);hi=Math.max(hi,p.r)})});
+      var step=nice((hi-lo)||1,4);lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
+      var x=function(t){return m.l+(t-tmin)/((tmax-tmin)||1)*iw},y=function(v){return m.t+(hi-v)/(hi-lo)*ih};
+      var s='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Pergerakan relatif aset terpilih, dimulai dari 100">';
+      for(var t=lo;t<=hi+1e-9;t+=step){t=Math.round(t*1e6)/1e6;
+        s+='<line class="'+(t===100?'zl':'gl')+'" x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+y(t)+'" y2="'+y(t)+'"/><text class="ax" x="'+(m.l-6)+'" y="'+(y(t)+3.5)+'" text-anchor="end">'+NUM.format(t)+'</text>'}
+      var ticks=Math.min(5,Math.floor(iw/90));
+      for(var k=0;k<=ticks;k++){var tt=tmin+(tmax-tmin)*k/ticks,dd=new Date(tt),lab=dd.getUTCDate()+' '+MON[dd.getUTCMonth()];
+        s+='<text class="ax" x="'+x(tt)+'" y="'+(h-8)+'" text-anchor="'+(k===0?'start':k===ticks?'end':'middle')+'">'+lab+'</text>'}
+      S.forEach(function(se){
+        var d=se.pts.map(function(p,i){return (i?'L':'M')+x(p.t).toFixed(1)+','+y(p.r).toFixed(1)}).join('');
+        var e=se.pts[se.pts.length-1];
+        s+='<path class="ln" d="'+d+'" stroke="var('+SLOT[se.id]+')"/><circle cx="'+x(e.t)+'" cy="'+y(e.r)+'" r="3.5" fill="var('+SLOT[se.id]+')" stroke="var(--surface)" stroke-width="2"/>';
+        if(wide) s+='<text class="ev" x="'+(x(e.t)+9)+'" y="'+(y(e.r)+3.5)+'">'+(e.r>=100?'+':'−')+Math.abs(e.r-100).toFixed(1).replace('.',',')+'%</text>';
+      });
+      s+='<line id="xh" x1="0" x2="0" y1="'+m.t+'" y2="'+(h-m.b)+'" stroke="var(--axis)" stroke-width="1" visibility="hidden"/>';
+      s+='<rect id="hit" x="'+m.l+'" y="'+m.t+'" width="'+iw+'" height="'+ih+'" fill="transparent"/></svg>';
+      el.innerHTML=s;
+      var hit=$('hit'),xh=$('xh');
+      function move(ev){
+        var rc=el.getBoundingClientRect(),px=ev.clientX-rc.left,t=tmin+(px-m.l)/iw*(tmax-tmin);
+        var rows='',dl='';
+        S.forEach(function(se){
+          var best=se.pts[0];se.pts.forEach(function(p){if(Math.abs(p.t-t)<Math.abs(best.t-t))best=p});
+          dl=best.d;
+          rows+='<div class="r"><i style="background:var('+SLOT[se.id]+')"></i>'+names[se.id]+' '+(best.r>=100?'+':'−')+Math.abs(best.r-100).toFixed(1).replace('.',',')+'%</div>';
+        });
+        var bx=x(Date.parse(dl));xh.setAttribute('x1',bx);xh.setAttribute('x2',bx);xh.setAttribute('visibility','visible');
+        showTip('<b>'+fdate(dl)+'</b>'+rows,ev.clientX,ev.clientY);
+      }
+      hit.addEventListener('pointermove',move);hit.addEventListener('pointerdown',move);
+      hit.addEventListener('pointerleave',function(){hideTip();xh.setAttribute('visibility','hidden')});
+    }
+    chips();draw();
+    var lastW=0;window.addEventListener('resize',function(){var w=document.body.clientWidth;if(w!==lastW){lastW=w;draw()}});
+  }
+
+  /* ---------- korelasi ---------- */
+  var CORR=[['spx','S&P'],['ndx','Nasdaq'],['jkse','IHSG'],['us10y','UST10'],['dxy','DXY'],['gold','Emas'],['brent','Brent'],['copper','Tembaga'],['btc','BTC'],['vix','VIX'],['usdidr','USD/IDR']];
+  var cwin=60;
+  function heat(H){
+    var ids=CORR.filter(function(c){return H[c[0]]});
+    $('cwin').innerHTML=[['20 hari',20],['60 hari',60],['120 hari',120]].map(function(x){return '<button type="button" data-w="'+x[1]+'" aria-pressed="'+(x[1]===cwin)+'">'+x[0]+'</button>'}).join('');
+    $('cwin').onclick=function(e){var b=e.target.closest('button');if(!b)return;cwin=+b.dataset.w;[].forEach.call($('cwin').children,function(x){x.setAttribute('aria-pressed',x===b)});draw()};
+    var maps={},common=null;
+    ids.forEach(function(c){var m={};H[c[0]].d.forEach(function(d,i){m[d]=H[c[0]].v[i]});maps[c[0]]=m;
+      var keys=Object.keys(m);common=common?common.filter(function(d){return m[d]!=null}):keys});
+    common.sort();
+    var rets={};
+    ids.forEach(function(c){var id=c[0],a=[];for(var i=1;i<common.length;i++){var p=maps[id][common[i-1]],q=maps[id][common[i]];a.push(id==='us10y'?q-p:q/p-1)}rets[id]=a});
+    function corr(a,b,n){a=a.slice(-n);b=b.slice(-n);var ma=0,mb=0,i;for(i=0;i<n;i++){ma+=a[i];mb+=b[i]}ma/=n;mb/=n;var sab=0,saa=0,sbb=0;for(i=0;i<n;i++){sab+=(a[i]-ma)*(b[i]-mb);saa+=(a[i]-ma)*(a[i]-ma);sbb+=(b[i]-mb)*(b[i]-mb)}return sab/Math.sqrt(saa*sbb)}
+    function draw(){
+      var n=Math.min(cwin,common.length-1);
+      var h='<table class="hm"><thead><tr><th></th>'+ids.map(function(c){return '<th class="c">'+c[1]+'</th>'}).join('')+'</tr></thead><tbody>';
+      ids.forEach(function(r){
+        h+='<tr><th style="text-align:right;white-space:nowrap">'+r[1]+'</th>';
+        ids.forEach(function(c){
+          if(r[0]===c[0]){h+='<td class="me">1,00</td>';return}
+          var v=corr(rets[r[0]],rets[c[0]],n),a=Math.min(Math.abs(v),1)*60;
+          h+='<td style="background:color-mix(in srgb,var('+(v>=0?'--up':'--down')+') '+a.toFixed(0)+'%,var(--surface))">'+(v>=0?'+':'−')+Math.abs(v).toFixed(2).replace('.',',')+'</td>';
+        });
+        h+='</tr>';
+      });
+      $('heat').innerHTML=h+'</tbody></table>';
+    }
+    draw();
+  }
+
+  /* ---------- arus dana ---------- */
+  function flows(F){
+    if(!F){$('flows').innerHTML='';$('fsub').textContent='data/flows.json belum ada.';return}
+    var age=Math.round((Date.now()-Date.parse(F.diperbarui))/864e5);
+    $('fsub').textContent='Miliar USD, '+F.sumber+' Diperbarui '+fdate(F.diperbarui)+(age>9?' ('+age+' hari lalu, mungkin sudah usang).':'.');
+    var mx=0;F.baris.forEach(function(r){r.nilai.forEach(function(v){mx=Math.max(mx,Math.abs(v))})});
+    var h='<thead><tr><th>Kelas aset</th>'+F.minggu.map(function(m){return '<th>'+m+'</th>'}).join('')+'</tr></thead><tbody>';
+    F.baris.forEach(function(r){
+      h+='<tr><td>'+r.nama+'</td>'+r.nilai.map(function(v){
+        var w=Math.max(2,Math.abs(v)/mx*54);
+        return '<td><div class="bcell"><span class="'+(v>=0?'up':'dn')+'">'+(v>=0?'+':'−')+Math.abs(v).toLocaleString('id-ID',{maximumFractionDigits:Math.abs(v)<1?2:1})+'</span><span class="bar '+(v>=0?'p':'n')+'" style="width:'+w+'px"></span></div></td>';
+      }).join('')+'</tr>';
+    });
+    $('flows').innerHTML=h+'</tbody>';
+  }
+
+  /* ---------- kalender ---------- */
+  function cal(E){
+    if(!E){$('cal').innerHTML='';$('csub').textContent='data/events.json belum ada.';return}
+    var today=new Date(Date.now()+7*36e5).toISOString().slice(0,10);
+    var rows=E.acara.filter(function(a){return a.tanggal>=today}).sort(function(a,b){return (a.tanggal+a.waktu)<(b.tanggal+b.waktu)?-1:1}).slice(0,9);
+    $('csub').textContent=E.sumber+' Diperbarui '+fdate(E.diperbarui)+'.';
+    $('cal').innerHTML=rows.length?rows.map(function(a){
+      return '<div class="crow"><div class="cd"><b>'+fdate(a.tanggal)+'</b>'+(a.waktu||'')+'</div><div><div class="ct">'+a.judul+'<span class="imp '+a.penting+'">'+a.penting+'</span></div>'+(a.catatan?'<div class="cn">'+a.catatan+'</div>':'')+'</div></div>';
+    }).join(''):'<p class="note">Tidak ada acara mendatang di data/events.json.</p>';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "diperbarui": "2026-10-19",
+  "sumber": "LSEG Lipper via Reuters, pekan berakhir 30 Sep, 7 Okt, 14 Okt 2026. Diisi manual tiap Jumat.",
+  "satuan": "miliar USD",
+  "minggu": ["30 Sep", "7 Okt", "14 Okt"],
+  "baris": [
+    {"nama": "Ekuitas global", "nilai": [34.76, 1.59, 20.01]},
+    {"nama": "Obligasi global", "nilai": [4.76, 26.03, 7.79]},
+    {"nama": "Pasar uang", "nilai": [-116.52, 153.98, -46.73]},
+    {"nama": "Emas & logam mulia", "nilai": [0.275, 1.41, -1.14]},
+    {"nama": "Energi", "nilai": [-0.559, 0.269, -0.216]},
+    {"nama": "Ekuitas negara berkembang", "nilai": [-1.37, -0.752, 0.717]}
+  ]
+}
